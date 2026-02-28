@@ -275,3 +275,62 @@ def artist_view(request, artist_id):
         'albums': albums,
     }
     return render(request, 'music/artist.html', context)
+@login_required
+def delete_playlist(request, playlist_id):
+    """Delete a playlist"""
+    playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+    
+    if request.method == 'POST':
+        playlist.delete()
+        messages.success(request, f'Playlist "{playlist.name}" deleted successfully.')
+    
+    return redirect('accounts:profile')
+
+@login_required
+@require_POST
+def remove_from_playlist(request, playlist_id):
+    """Remove a song from playlist"""
+    playlist = get_object_or_404(Playlist, id=playlist_id, user=request.user)
+    song_id = request.POST.get('song_id')
+    
+    if song_id:
+        playlist.songs.remove(song_id)
+        messages.success(request, 'Song removed from playlist.')
+    
+    return redirect('music:playlist_detail', playlist_id=playlist_id)
+
+@staff_member_required
+def delete_song(request, song_id):
+    """Delete a song (admin only)"""
+    song = get_object_or_404(Song, id=song_id)
+    
+    if request.method == 'POST':
+        song.delete()
+        messages.success(request, f'Song "{song.title}" deleted successfully.')
+    
+    return redirect('music:manage_songs')
+
+@staff_member_required
+def edit_song(request, song_id):
+    """Edit a song (admin only)"""
+    song = get_object_or_404(Song, id=song_id)
+    
+    if request.method == 'POST':
+        # Handle edit form submission
+        song.title = request.POST.get('title')
+        # ... update other fields
+        song.save()
+        messages.success(request, 'Song updated successfully.')
+        return redirect('music:song_detail', song_id=song.id)
+    
+    artists = Artist.objects.all()
+    albums = Album.objects.all()
+    genres = Genre.objects.all()
+    
+    context = {
+        'song': song,
+        'artists': artists,
+        'albums': albums,
+        'genres': genres,
+    }
+    return render(request, 'music/edit_song.html', context)

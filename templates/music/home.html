@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Music Player{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="jumbotron bg-light p-5 rounded mb-4">
+        <h1 class="display-4">Welcome to Music Player</h1>
+        <p class="lead">Listen to your favorite music, create playlists, and discover new artists.</p>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-user-plus"></i> Sign Up Now
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Recent Songs -->
+    <section class="mb-5">
+        <h2 class="mb-4">
+            <i class="fas fa-clock"></i> Recently Added
+            <a href="#" class="btn btn-sm btn-outline-primary float-end">View All</a>
+        </h2>
+        
+        <div class="row">
+            {% for song in recent_songs %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    {% if song.cover_image %}
+                        <img src="{{ song.cover_image.url }}" class="card-img-top" alt="{{ song.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-music fa-3x"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ song.title }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ song.artist.name }}</h6>
+                        <p class="card-text small">
+                            <i class="fas fa-play"></i> {{ song.plays_count }} plays
+                        </p>
+                        <a href="{% url 'music:song_detail' song.id %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-play"></i> Play
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-center text-muted">No songs available yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <!-- Popular Songs -->
+    <section class="mb-5">
+        <h2 class="mb-4">
+            <i class="fas fa-fire"></i> Popular Songs
+        </h2>
+        
+        <div class="list-group">
+            {% for song in popular_songs %}
+            <a href="{% url 'music:song_detail' song.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0">{{ song.title }}</h6>
+                    <small class="text-muted">{{ song.artist.name }}</small>
+                </div>
+                <span class="badge bg-primary rounded-pill">
+                    <i class="fas fa-play"></i> {{ song.plays_count }}
+                </span>
+            </a>
+            {% empty %}
+            <div class="list-group-item text-center text-muted">
+                No popular songs yet.
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <!-- Featured Artists -->
+    <section class="mb-5">
+        <h2 class="mb-4">
+            <i class="fas fa-star"></i> Featured Artists
+        </h2>
+        
+        <div class="row">
+            {% for artist in featured_artists %}
+            <div class="col-md-2 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        {% if artist.image %}
+                            <img src="{{ artist.image.url }}" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" alt="{{ artist.name }}">
+                        {% else %}
+                            <div class="bg-secondary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                <i class="fas fa-user fa-3x text-white"></i>
+                            </div>
+                        {% endif %}
+                        <h6 class="card-title">{{ artist.name }}</h6>
+                        <a href="{% url 'music:artist' artist.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <!-- Genres -->
+    <section class="mb-5">
+        <h2 class="mb-4">
+            <i class="fas fa-tags"></i> Browse by Genre
+        </h2>
+        
+        <div class="row">
+            {% for genre in genres %}
+            <div class="col-md-3 mb-3">
+                <a href="{% url 'music:genre' genre.id %}" class="text-decoration-none">
+                    <div class="card bg-primary text-white text-center">
+                        <div class="card-body">
+                            <h5>{{ genre.name }}</h5>
+                            <small>{{ genre.song_count }} songs</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

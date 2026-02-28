@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ artist.name }} - Artist{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Artist Header -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow">
+                {% if artist.image %}
+                    <img src="{{ artist.image.url }}" class="card-img-top" alt="{{ artist.name }}" 
+                         style="height: 350px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-secondary d-flex align-items-center justify-content-center" 
+                         style="height: 350px;">
+                        <i class="fas fa-user fa-5x text-white"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="card-body text-center">
+                    <h2 class="card-title">{{ artist.name }}</h2>
+                    
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h5>{{ songs.count }}</h5>
+                                <small class="text-muted">Songs</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div>
+                                <h5>{{ albums.count }}</h5>
+                                <small class="text-muted">Albums</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        {% if artist.bio %}
+                            <p class="text-muted">{{ artist.bio }}</p>
+                        {% else %}
+                            <p class="text-muted">No biography available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Top Songs -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-fire"></i> Popular Songs</h5>
+                </div>
+                
+                <div class="list-group list-group-flush">
+                    {% for song in songs|slice:":10" %}
+                        <a href="{% url 'music:song_detail' song.id %}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            <div class="me-3" style="width: 30px;">
+                                <span class="text-muted">{{ forloop.counter }}</span>
+                            </div>
+                            
+                            {% if song.cover_image %}
+                                <img src="{{ song.cover_image.url }}" alt="{{ song.title }}" 
+                                     style="width: 50px; height: 50px; object-fit: cover;" 
+                                     class="me-3 rounded">
+                            {% else %}
+                                <div class="bg-secondary me-3 rounded d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-music text-white"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">{{ song.title }}</h6>
+                                {% if song.album %}
+                                    <small class="text-muted">{{ song.album.title }}</small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="text-muted me-3">
+                                <i class="fas fa-play"></i> {{ song.plays_count }}
+                            </div>
+                            
+                            <span class="text-muted me-3">{{ song.duration }}</span>
+                            
+                            <button class="btn btn-sm btn-outline-primary" onclick="playSong({{ song.id }})">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </a>
+                    {% empty %}
+                        <div class="list-group-item text-center text-muted">
+                            No songs available for this artist.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Albums -->
+            {% if albums %}
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-compact-disc"></i> Albums</h5>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="row">
+                            {% for album in albums %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        {% if album.cover_image %}
+                                            <img src="{{ album.cover_image.url }}" class="card-img-top" 
+                                                 alt="{{ album.title }}" style="height: 150px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-secondary d-flex align-items-center justify-content-center" 
+                                                 style="height: 150px;">
+                                                <i class="fas fa-compact-disc fa-3x text-white"></i>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="card-body">
+                                            <h6 class="card-title text-truncate">{{ album.title }}</h6>
+                                            <p class="card-text small text-muted">
+                                                <i class="fas fa-calendar"></i> 
+                                                {{ album.release_date|date:"Y"|default:"Unknown" }}<br>
+                                                <i class="fas fa-music"></i> {{ album.songs.count }} songs
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="card-footer bg-transparent p-2">
+                                            <a href="#" class="btn btn-sm btn-outline-primary w-100">
+                                                View Album
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function playSong(songId) {
+        console.log('Playing song:', songId);
+        // Implement with your music player
+        // You might want to create a playlist of all songs and start from this song
+    }
+</script>
+{% endblock %}

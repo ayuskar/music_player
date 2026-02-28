@@ -1,0 +1,133 @@
+/* Custom Styles for Music Player */
+
+/* General Styles */
+body {
+    padding-bottom: 100px; /* Space for fixed player */
+    background-color: #f8f9fa;
+}
+
+/* Music Player Bar */
+.music-player-bar {
+    background: linear-gradient(to right, #1e1e2f, #2d2d44);
+    border-top: 2px solid #4a4a6a;
+    z-index: 1000;
+}
+
+/* Song Cards */
+.song-card {
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.song-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Lyrics Container */
+.lyrics-container {
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    line-height: 1.8;
+}
+
+/* Progress Bar */
+.progress-container {
+    width: 100%;
+    height: 5px;
+    background: #e9ecef;
+    cursor: pointer;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, #007bff, #00d4ff);
+    width: 0%;
+    transition: width 0.1s;
+}
+
+/* Playlist Items */
+.playlist-item {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.2s;
+}
+
+.playlist-item:hover {
+    background-color: #f8f9fa;
+}
+
+.playlist-item.active {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Custom Buttons */
+.btn-play {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #007bff, #00d4ff);
+    color: white;
+    transition: transform 0.2s;
+}
+
+.btn-play:hover {
+    transform: scale(1.1);
+    color: white;
+}
+
+/* Like Button Animation */
+.like-button {
+    color: #dc3545;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.like-button:hover {
+    transform: scale(1.2);
+}
+
+.like-button.liked {
+    animation: likePulse 0.3s;
+}
+
+@keyframes likePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/* Admin Dashboard */
+.stats-card {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .music-player-bar {
+        padding: 10px;
+    }
+    
+    .now-playing-info {
+        display: none;
+    }
+    
+    .search-form {
+        width: 100% !important;
+        margin: 10px 0;
+    }
+}

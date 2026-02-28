@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results for "{{ query }}"{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Search Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>
+                <i class="fas fa-search"></i> 
+                {% if query %}
+                    Search Results for "{{ query }}"
+                {% else %}
+                    Search Music
+                {% endif %}
+            </h2>
+            
+            <!-- Search Again -->
+            <form action="{% url 'music:search' %}" method="GET" class="mt-3">
+                <div class="input-group">
+                    <input type="text" class="form-control form-control-lg" name="q" 
+                           placeholder="Search songs, artists, albums..." value="{{ query }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if query %}
+        <!-- Results Tabs -->
+        <ul class="nav nav-tabs mb-4" id="searchTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="songs-tab" data-bs-toggle="tab" data-bs-target="#songs" 
+                        type="button" role="tab">
+                    <i class="fas fa-music"></i> Songs ({{ songs.count }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="artists-tab" data-bs-toggle="tab" data-bs-target="#artists" 
+                        type="button" role="tab">
+                    <i class="fas fa-user"></i> Artists ({{ artists.count }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="albums-tab" data-bs-toggle="tab" data-bs-target="#albums" 
+                        type="button" role="tab">
+                    <i class="fas fa-compact-disc"></i> Albums ({{ albums.count }})
+                </button>
+            </li>
+        </ul>
+        
+        <!-- Tab Content -->
+        <div class="tab-content" id="searchTabsContent">
+            <!-- Songs Tab -->
+            <div class="tab-pane fade show active" id="songs" role="tabpanel">
+                {% if songs %}
+                    <div class="row">
+                        {% for song in songs %}
+                            <div class="col-md-3 mb-4">
+                                <div class="card h-100 song-card">
+                                    {% if song.cover_image %}
+                                        <img src="{{ song.cover_image.url }}" class="card-img-top" alt="{{ song.title }}" 
+                                             style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" 
+                                             style="height: 200px;">
+                                            <i class="fas fa-music fa-3x"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h5 class="card-title text-truncate">{{ song.title }}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted text-truncate">{{ song.artist.name }}</h6>
+                                        <p class="card-text small">
+                                            {% if song.album %}
+                                                <i class="fas fa-compact-disc"></i> {{ song.album.title }}<br>
+                                            {% endif %}
+                                            <i class="fas fa-play"></i> {{ song.plays_count }} plays
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="{% url 'music:song_detail' song.id %}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-play"></i> Play
+                                            </a>
+                                            <small class="text-muted">{{ song.duration }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No songs found matching "{{ query }}"
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Artists Tab -->
+            <div class="tab-pane fade" id="artists" role="tabpanel">
+                {% if artists %}
+                    <div class="row">
+                        {% for artist in artists %}
+                            <div class="col-md-3 mb-4">
+                                <a href="{% url 'music:artist' artist.id %}" class="text-decoration-none">
+                                    <div class="card text-center h-100">
+                                        {% if artist.image %}
+                                            <img src="{{ artist.image.url }}" class="card-img-top rounded-circle mx-auto mt-3" 
+                                                 alt="{{ artist.name }}" style="width: 150px; height: 150px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-secondary rounded-circle mx-auto mt-3 d-flex align-items-center justify-content-center" 
+                                                 style="width: 150px; height: 150px;">
+                                                <i class="fas fa-user fa-4x text-white"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ artist.name }}</h5>
+                                            <p class="card-text text-muted small">
+                                                <i class="fas fa-music"></i> {{ artist.songs.count }} songs<br>
+                                                <i class="fas fa-compact-disc"></i> {{ artist.albums.count }} albums
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No artists found matching "{{ query }}"
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Albums Tab -->
+            <div class="tab-pane fade" id="albums" role="tabpanel">
+                {% if albums %}
+                    <div class="row">
+                        {% for album in albums %}
+                            <div class="col-md-3 mb-4">
+                                <div class="card h-100">
+                                    {% if album.cover_image %}
+                                        <img src="{{ album.cover_image.url }}" class="card-img-top" alt="{{ album.title }}" 
+                                             style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" 
+                                             style="height: 200px;">
+                                            <i class="fas fa-compact-disc fa-3x"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h5 class="card-title text-truncate">{{ album.title }}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted text-truncate">{{ album.artist.name }}</h6>
+                                        <p class="card-text small">
+                                            <i class="fas fa-calendar"></i> {{ album.release_date|date:"Y" }}<br>
+                                            <i class="fas fa-music"></i> {{ album.songs.count }} songs
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No albums found matching "{{ query }}"
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <!-- No Query State - Show Popular Searches -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-fire"></i> Popular Searches</h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'music:search' %}?q=pop" class="list-group-item list-group-item-action">
+                            Pop Music
+                        </a>
+                        <a href="{% url 'music:search' %}?q=rock" class="list-group-item list-group-item-action">
+                            Rock Music
+                        </a>
+                        <a href="{% url 'music:search' %}?q=hip hop" class="list-group-item list-group-item-action">
+                            Hip Hop
+                        </a>
+                        <a href="{% url 'music:search' %}?q=electronic" class="list-group-item list-group-item-action">
+                            Electronic
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-clock"></i> Search Tips</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Search for song titles</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Find your favorite artists</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Discover new albums</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Browse by genre</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

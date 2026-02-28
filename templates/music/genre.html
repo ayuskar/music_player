@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ genre.name }} - Genre{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Genre Header -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="jumbotron bg-gradient p-5 rounded text-white" 
+                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h1 class="display-4"><i class="fas fa-music"></i> {{ genre.name }}</h1>
+                <p class="lead">{{ genre.description|default:"Browse all songs in this genre" }}</p>
+                <p class="mb-0">
+                    <span class="badge bg-light text-dark">{{ songs.count }} songs available</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Songs Grid -->
+    <div class="row">
+        {% if songs %}
+            {% for song in songs %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100 song-card">
+                        {% if song.cover_image %}
+                            <img src="{{ song.cover_image.url }}" class="card-img-top" alt="{{ song.title }}" 
+                                 style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" 
+                                 style="height: 200px;">
+                                <i class="fas fa-music fa-3x"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">{{ song.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted text-truncate">
+                                <a href="{% url 'music:artist' song.artist.id %}" class="text-decoration-none">
+                                    {{ song.artist.name }}
+                                </a>
+                            </h6>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <div>
+                                    {% if song.album %}
+                                        <small class="text-muted">
+                                            <i class="fas fa-compact-disc"></i> {{ song.album.title|truncatechars:15 }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                <span class="badge bg-primary">{{ song.duration }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{% url 'music:song_detail' song.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-play"></i> Play
+                                </a>
+                                <small class="text-muted">
+                                    <i class="fas fa-headphones"></i> {{ song.plays_count }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center py-5">
+                    <i class="fas fa-info-circle fa-3x mb-3"></i>
+                    <h4>No songs available in this genre yet</h4>
+                    <p>Check back later for updates!</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination (if needed) -->
+    {% if songs.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if songs.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ songs.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                {% for i in songs.paginator.page_range %}
+                    <li class="page-item {% if songs.number == i %}active{% endif %}">
+                        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+                
+                {% if songs.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ songs.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

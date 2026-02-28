@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ song.title }} - {{ song.artist.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .lyrics-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .lyrics-text {
+        font-family: 'Courier New', monospace;
+        white-space: pre-wrap;
+        line-height: 1.8;
+        font-size: 1.1rem;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .song-info-card {
+        background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    
+    .play-btn-large {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00b4db, #0083b0);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        transition: all 0.3s;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(0,180,219,0.3);
+    }
+    
+    .play-btn-large:hover {
+        transform: scale(1.1);
+        box-shadow: 0 15px 30px rgba(0,180,219,0.4);
+    }
+    
+    .wave-animation {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        height: 50px;
+    }
+    
+    .wave-bar {
+        width: 4px;
+        height: 20px;
+        background: #00b4db;
+        animation: wave 1s ease-in-out infinite;
+    }
+    
+    @keyframes wave {
+        0%, 100% { height: 20px; }
+        50% { height: 40px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Song Header -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="song-info-card shadow">
+                {% if song.cover_image %}
+                    <img src="{{ song.cover_image.url }}" class="img-fluid w-100" alt="{{ song.title }}" 
+                         style="height: 350px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 350px;">
+                        <i class="fas fa-music fa-5x text-white"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2 class="mb-1">{{ song.title }}</h2>
+                            <h5 class="text-muted">
+                                <a href="{% url 'music:artist' song.artist.id %}" class="text-decoration-none">
+                                    {{ song.artist.name }}
+                                </a>
+                            </h5>
+                            {% if song.album %}
+                                <p class="mb-0">
+                                    <i class="fas fa-compact-disc"></i> Album: 
+                                    <a href="#" class="text-decoration-none">{{ song.album.title }}</a>
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        {% if user.is_authenticated %}
+                            <div class="like-button {% if user.usersonginteraction_set.get.is_liked %}liked{% endif %}" 
+                                 data-song-id="{{ song.id }}">
+                                <i class="{% if user.usersonginteraction_set.get.is_liked %}fas{% else %}far{% endif %} fa-heart fa-2x text-danger"></i>
+                                <span class="like-count">{{ song.likes_count }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row text-center mb-4">
+                        <div class="col-4">
+                            <div class="border-end">
+                                <h6 class="text-muted mb-0">Plays</h6>
+                                <span class="h5">{{ song.plays_count }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border-end">
+                                <h6 class="text-muted mb-0">Duration</h6>
+                                <span class="h5">{{ song.duration }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div>
+                                <h6 class="text-muted mb-0">Uploaded</h6>
+                                <span class="h6">{{ song.uploaded_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-3">
+                        <div class="play-btn-large" onclick="playSong()">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        
+                        {% if user.is_authenticated %}
+                            <button class="btn btn-outline-primary flex-grow-1" onclick="addToPlaylist()">
+                                <i class="fas fa-plus"></i> Add to Playlist
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                    {% if song.genre.all %}
+                        <div class="mt-3">
+                            <h6 class="text-muted">Genres:</h6>
+                            {% for genre in song.genre.all %}
+                                <a href="{% url 'music:genre' genre.id %}" class="badge bg-info text-decoration-none p-2">
+                                    {{ genre.name }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    {% if song.lyrics_source == 'generated' %}
+                        <div class="mt-2">
+                            <span class="badge bg-success">
+                                <i class="fas fa-robot"></i> AI Generated Lyrics
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Lyrics Section -->
+            <div class="lyrics-container shadow">
+                <h3 class="mb-4">
+                    <i class="fas fa-scroll"></i> Lyrics
+                    <small class="float-end">
+                        <span class="badge bg-light text-dark">{{ song.duration }}</span>
+                    </small>
+                </h3>
+                
+                {% if song.lyrics %}
+                    <div class="lyrics-text" id="lyrics-text">
+                        {{ song.lyrics|linebreaksbr }}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-music fa-3x mb-3"></i>
+                        <p>No lyrics available for this song.</p>
+                        {% if user.is_staff %}
+                            <a href="{% url 'music:add_song' %}?edit={{ song.id }}" class="btn btn-light">
+                                <i class="fas fa-edit"></i> Add Lyrics
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Wave Animation (visible when playing) -->
+            <div class="wave-animation mt-3 justify-content-center d-none" id="wave-animation">
+                <div class="wave-bar" style="animation-delay: 0s"></div>
+                <div class="wave-bar" style="animation-delay: 0.2s"></div>
+                <div class="wave-bar" style="animation-delay: 0.4s"></div>
+                <div class="wave-bar" style="animation-delay: 0.6s"></div>
+                <div class="wave-bar" style="animation-delay: 0.8s"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Similar Songs -->
+    {% if similar_songs %}
+    <section class="mt-5">
+        <h3 class="mb-4">
+            <i class="fas fa-music"></i> You Might Also Like
+        </h3>
+        
+        <div class="row">
+            {% for similar in similar_songs %}
+            <div class="col-md-2.4 col-sm-4 mb-3">
+                <div class="card h-100 song-card">
+                    {% if similar.cover_image %}
+                        <img src="{{ similar.cover_image.url }}" class="card-img-top" alt="{{ similar.title }}" 
+                             style="height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" 
+                             style="height: 150px;">
+                            <i class="fas fa-music fa-2x"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body p-2">
+                        <h6 class="card-title mb-0 text-truncate">{{ similar.title }}</h6>
+                        <small class="text-muted">{{ similar.artist.name }}</small>
+                    </div>
+                    <div class="card-footer bg-transparent p-2">
+                        <a href="{% url 'music:song_detail' similar.id %}" class="btn btn-sm btn-primary w-100">
+                            <i class="fas fa-play"></i> Play
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<!-- Add to Playlist Modal -->
+<div class="modal fade" id="playlistModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle"></i> Add to Playlist
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'music:add_to_playlist' song.id %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="playlist_select" class="form-label">Select Playlist</label>
+                        <select class="form-select" id="playlist_select" name="playlist_id" required>
+                            <option value="">Choose a playlist...</option>
+                            {% for playlist in user.playlists.all %}
+                            <option value="{{ playlist.id }}">{{ playlist.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add to Playlist
+                        </button>
+                    </div>
+                </form>
+                
+                <hr>
+                
+                <div class="text-center">
+                    <a href="{% url 'music:create_playlist' %}" class="btn btn-outline-success">
+                        <i class="fas fa-plus"></i> Create New Playlist
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function playSong() {
+        const playBtn = document.querySelector('.play-btn-large i');
+        const waveAnimation = document.getElementById('wave-animation');
+        
+        if (playBtn.classList.contains('fa-play')) {
+            playBtn.classList.remove('fa-play');
+            playBtn.classList.add('fa-pause');
+            waveAnimation.classList.remove('d-none');
+            
+            // You would integrate with your actual audio player here
+            console.log('Playing: {{ song.title }}');
+        } else {
+            playBtn.classList.remove('fa-pause');
+            playBtn.classList.add('fa-play');
+            waveAnimation.classList.add('d-none');
+            
+            // Pause audio here
+            console.log('Paused: {{ song.title }}');
+        }
+    }
+    
+    function addToPlaylist() {
+        $('#playlistModal').modal('show');
+    }
+    
+    // Like button functionality
+    document.querySelector('.like-button')?.addEventListener('click', function() {
+        const button = this;
+        const songId = button.dataset.songId;
+        const isLiked = button.classList.contains('liked');
+        const action = isLiked ? 'unlike' : 'like';
+        
+        fetch('/like-song/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ song_id: songId, action: action })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                button.classList.toggle('liked');
+                button.querySelector('i').className = data.is_liked ? 'fas fa-heart fa-2x text-danger' : 'far fa-heart fa-2x text-danger';
+                button.querySelector('.like-count').textContent = data.likes_count;
+            }
+        });
+    });
+</script>
+{% endblock %}

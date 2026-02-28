@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Add Song - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-plus-circle"></i> Add New Song</h2>
+    <hr>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Song Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="artist" class="form-label">Artist Name *</label>
+                                <input type="text" class="form-control" id="artist" name="artist" 
+                                       list="artist-list" required>
+                                <datalist id="artist-list">
+                                    {% for artist in artists %}
+                                    <option value="{{ artist.name }}">
+                                    {% endfor %}
+                                </datalist>
+                                <small class="text-muted">Type name of existing artist or new artist</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="album" class="form-label">Album Name</label>
+                                <input type="text" class="form-control" id="album" name="album" 
+                                       list="album-list">
+                                <datalist id="album-list">
+                                    {% for album in albums %}
+                                    <option value="{{ album.title }}">
+                                    {% endfor %}
+                                </datalist>
+                                <small class="text-muted">Optional: Type album name</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="genres" class="form-label">Genres</label>
+                            <select class="form-control" id="genres" name="genres" multiple>
+                                {% for genre in genres %}
+                                <option value="{{ genre.id }}">{{ genre.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Hold Ctrl to select multiple</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="audio_file" class="form-label">Audio File *</label>
+                                <input type="file" class="form-control" id="audio_file" 
+                                       name="audio_file" accept="audio/*" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="cover_image" class="form-label">Cover Image</label>
+                                <input type="file" class="form-control" id="cover_image" 
+                                       name="cover_image" accept="image/*">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="generate_lyrics" 
+                                       name="generate_lyrics">
+                                <label class="form-check-label" for="generate_lyrics">
+                                    Generate lyrics automatically
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="lyrics" class="form-label">Lyrics</label>
+                            <textarea class="form-control" id="lyrics" name="lyrics" rows="10"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Add Song
+                        </button>
+                        <a href="{% url 'music:home' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-info-circle"></i> Instructions
+                </div>
+                <div class="card-body">
+                    <h6>Adding Songs:</h6>
+                    <ul class="small">
+                        <li>Fill all required fields marked with *</li>
+                        <li>Artist name can be new or existing</li>
+                        <li>Album name is optional</li>
+                        <li>Supported audio formats: MP3, WAV, etc.</li>
+                        <li>Cover image should be square for best display</li>
+                        <li>Check "Generate lyrics" for automatic lyrics</li>
+                        <li>You can also paste lyrics manually</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

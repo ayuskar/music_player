@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login - Music Player{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0"><i class="fas fa-sign-in-alt"></i> Login to Music Player</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-2">Don't have an account?</p>
+                        <a href="{% url 'accounts:register' %}" class="btn btn-outline-success">
+                            <i class="fas fa-user-plus"></i> Register Now
+                        </a>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a href="#" class="text-muted small">Forgot Password?</a>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-light text-center py-3">
+                    <div class="row">
+                        <div class="col-4">
+                            <i class="fas fa-music text-primary"></i>
+                            <small class="d-block">Listen</small>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-heart text-danger"></i>
+                            <small class="d-block">Like</small>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-list text-success"></i>
+                            <small class="d-block">Playlists</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

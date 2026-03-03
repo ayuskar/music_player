@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     'music_player',
     'music',
     'accounts',
-    'crispy_forms'
+    'crispy_forms',
+    'crispy_bootstrap4',
+
 ]
 
 MIDDLEWARE = [
@@ -127,6 +129,7 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = [BASE_DIR / 'media']
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'music:home'

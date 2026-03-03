@@ -22,8 +22,8 @@ urlpatterns = [
     path('artist/<int:artist_id>/', views.artist_view, name='artist'),
     
     # Admin URLs
-    path('admin/add-song/', views.add_song, name='add_song'),
-    path('admin/manage-songs/', views.manage_songs, name='manage_songs'),
-    path('admin/delete-song/<int:song_id>/', views.delete_song, name='delete_song'),
-    path('admin/edit-song/<int:song_id>/', views.edit_song, name='edit_song'),
+    path('add-song/', views.add_song, name='add_song'),
+    path('manage-songs/', views.manage_songs, name='manage_songs'),
+    path('delete-song/<int:song_id>/', views.delete_song, name='delete_song'),
+    path('edit-song/<int:song_id>/', views.edit_song, name='edit_song'),
 ]
